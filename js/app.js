@@ -29,13 +29,6 @@
 		});
 	}
 
-	// binary string (latin1) -> proper UTF-8 decoded JS string
-	function utf8Decode(bin) {
-		var bytes = new Uint8Array(bin.length);
-		for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i) & 0xff;
-		return new TextDecoder('utf-8').decode(bytes);
-	}
-
 	function getId() {
 		var q = window.location.search.replace(/^\?/, '');
 		q = q.split('&')[0];
@@ -96,8 +89,8 @@
 		// blob.d = SJCL ciphertext JSON string; SJCL picks ccm/gcm and PBKDF2
 		// params from the blob itself and derives the key from the URL fragment.
 		var b64 = sjcl.decrypt(getKey(), blob.d);
-		var inflated = RawDeflate.inflate(atob(b64));
-		var text = utf8Decode(inflated);
+		var bytes = Uint8Array.from(atob(b64), function (c) { return c.charCodeAt(0) & 0xff; });
+		var text = new TextDecoder('utf-8').decode(pako.inflateRaw(bytes));
 
 		// some v1 pastes wrap the message as {"paste":"..."}; unwrap if present
 		try {
