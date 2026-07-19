@@ -48,6 +48,12 @@
 		return h;
 	}
 
+	DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+		if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+			node.setAttribute('rel', 'noopener noreferrer nofollow');
+		}
+	});
+
 	function render(text, formatter) {
 		sourceEl.textContent = text;
 
